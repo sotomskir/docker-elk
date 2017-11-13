@@ -1,45 +1,117 @@
-version: '2'
+version: '3.3'
 
 services:
 
   elasticsearch:
-    build: elasticsearch/
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0
+    ulimits:
+      memlock: -1
+      nofile:
+        hard: 65536
+        soft: 65536
+      nproc: 65538
     volumes:
-      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - esdata:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    configs:
+      - source: elasticsearch_config
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 1000M
     networks:
       - elk
 
   logstash:
-    build: logstash/
-    volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    image: docker.elastic.co/logstash/logstash:6.0.0
     ports:
       - "5000:5000"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    deploy:
+      mode: global
     networks:
       - elk
+    configs:
+      - source: logstash_config
+        target: /usr/share/logstash/config/logstash.yml
+      - source: logstash_pipeline_config
+        target: /usr/share/logstash/pipeline/logstash.conf
     depends_on:
       - elasticsearch
 
   kibana:
-    build: kibana/
-    volumes:
-      - ./kibana/config/:/usr/share/kibana/config
+    image: docker.elastic.co/kibana/kibana:6.0.0
     ports:
       - "5601:5601"
+    deploy:
+      mode: replicated
+      replicas: 1
     networks:
       - elk
+    configs:
+      - source: kibana_config
+        target: /usr/share/kibana/config/kibana.yml
     depends_on:
       - elasticsearch
 
-networks:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.0.0
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    deploy:
+      mode: global
+    configs:
+      - source: filebeat_config
+        target: /usr/share/filebeat/filebeat.yml
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
 
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:6.0.0
+    user: root
+    configs:
+      - source: metricbeat_config
+        target: /usr/share/metricbeat/metricbeat.yml
+    deploy:
+      mode: global
+    networks:
+      - elk
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+
+networks:
   elk:
-    driver: bridge
+    driver: overlay
+  host:
+    external: true
+
+volumes:
+  esdata:
+    driver: local
+
+configs:
+  elasticsearch_config:
+    file: ./elasticsearch/config/elasticsearch.yml
+  logstash_config:
+    file: ./logstash/config/logstash.yml
+  logstash_pipeline_config:
+    file: ./logstash/pipeline/logstash.conf
+  kibana_config:
+    file: ./kibana/config/kibana.yml
+  filebeat_config:
+    file: ./filebeat/config/filebeat.yml
+  metricbeat_config:
+    file: ./metricbeat/config/metricbeat.yml
