@@ -22,9 +22,6 @@ services:
         target: /usr/share/elasticsearch/config/elasticsearch.yml
     deploy:
       mode: global
-      resources:
-        limits:
-          memory: 1000M
     networks:
       - elk
 
@@ -33,7 +30,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: -Xms512m -Xmx512m
     deploy:
       mode: global
     networks:
@@ -91,6 +88,7 @@ services:
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   elk:
