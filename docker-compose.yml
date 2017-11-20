@@ -44,6 +44,7 @@ services:
     image: docker.elastic.co/beats/filebeat:6.0.0
     user: root
     volumes:
+      - fbdata:/usr/share/filebeat/data
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers
     deploy:
@@ -80,6 +81,8 @@ networks:
 
 volumes:
   esdata:
+    driver: local
+  fbdata:
     driver: local
 
 configs:
