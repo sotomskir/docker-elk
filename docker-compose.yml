@@ -25,24 +25,6 @@ services:
     networks:
       - elk
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:6.0.0
-    ports:
-      - "5000:5000"
-    environment:
-      LS_JAVA_OPTS: -Xms512m -Xmx512m
-    deploy:
-      mode: global
-    networks:
-      - elk
-    configs:
-      - source: logstash_config
-        target: /usr/share/logstash/config/logstash.yml
-      - source: logstash_pipeline_config
-        target: /usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - elasticsearch
-
   kibana:
     image: docker.elastic.co/kibana/kibana:6.0.0
     ports:
@@ -103,10 +85,6 @@ volumes:
 configs:
   elasticsearch_config:
     file: ./elasticsearch/config/elasticsearch.yml
-  logstash_config:
-    file: ./logstash/config/logstash.yml
-  logstash_pipeline_config:
-    file: ./logstash/pipeline/logstash.conf
   kibana_config:
     file: ./kibana/config/kibana.yml
   filebeat_config:
