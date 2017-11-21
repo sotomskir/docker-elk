@@ -6,6 +6,8 @@ filebeat.prospectors:
   json.keys_under_root: true
   processors:
   - add_docker_metadata: ~
+  - decode_json_fields:
+      fields: ["log"]
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
   pipeline: docker_logs_pipeline
