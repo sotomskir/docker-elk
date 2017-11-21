@@ -8,5 +8,6 @@ filebeat.prospectors:
   - add_docker_metadata: ~
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
+  pipeline: docker_logs_pipeline
 setup.kibana.host: "kibana:5601"
 setup.dashboards.enabled: true
