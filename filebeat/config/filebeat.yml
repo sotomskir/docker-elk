@@ -8,6 +8,10 @@ filebeat.prospectors:
   - add_docker_metadata: ~
   - decode_json_fields:
       fields: ["log"]
+      process_array: false
+      max_depth: 1
+      target: ""
+      overwrite_keys: false
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
   pipeline: docker_logs_pipeline
