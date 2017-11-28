@@ -30,5 +30,5 @@ metricbeat.modules:
   period: 10s
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
-setup.kibana.host: "kibana:5601"
-setup.dashboards.enabled: true
+#setup.kibana.host: "kibana:5601"
+#setup.dashboards.enabled: true

@@ -10,10 +10,10 @@ filebeat.prospectors:
       fields: ["log"]
       process_array: false
       max_depth: 1
-      target: ""
+      target: "decodedLog"
       overwrite_keys: false
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
   pipeline: docker_logs_pipeline
-setup.kibana.host: "kibana:5601"
-setup.dashboards.enabled: true
+#setup.kibana.host: "kibana:5601"
+#setup.dashboards.enabled: true
